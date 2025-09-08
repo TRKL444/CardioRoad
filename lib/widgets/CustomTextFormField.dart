@@ -8,6 +8,8 @@ class CustomTextFormField extends StatelessWidget {
   final TextInputType keyboardType;
   final bool obscureText;
   final Widget? suffixIcon;
+  final String? hintText; // Adicionado hintText
+  // Adicionado o tipo correto para inputFormatters aqui
   final String? Function(String?)? validator;
   // TIPO CORRIGIDO AQUI: De List<dynamic> para List<TextInputFormatter>
   final List<TextInputFormatter>? inputFormatters;
@@ -18,6 +20,7 @@ class CustomTextFormField extends StatelessWidget {
     required this.labelText,
     this.keyboardType = TextInputType.text,
     this.obscureText = false,
+    this.hintText,
     this.suffixIcon,
     this.validator,
     this.inputFormatters,
@@ -32,6 +35,7 @@ class CustomTextFormField extends StatelessWidget {
       inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: labelText,
+        hintText: hintText, // Adicionado hintText aqui
         labelStyle: const TextStyle(color: AppColors.greyText),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(

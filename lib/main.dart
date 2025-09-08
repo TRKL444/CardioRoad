@@ -17,7 +17,9 @@ class MyApp extends StatelessWidget {
       title: 'CardioRoad',
       theme: ThemeData(
         // Define uma fonte global para o app para um visual mais consistente.
-        // Lembre-se de adicionar a fonte no seu pubspec.yaml se for uma customizada.
+        // Para usar uma fonte customizada como 'Poppins', adicione os arquivos da fonte na pasta assets/fonts,
+        // e declare a fonte em pubspec.yaml conforme a documentação oficial:
+        // https://docs.flutter.dev/ui/assets#declaring-fonts-in-the-pubspec-file
         fontFamily: 'Poppins',
       ),
       debugShowCheckedModeBanner: false,
