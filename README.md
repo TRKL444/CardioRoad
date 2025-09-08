@@ -67,4 +67,4 @@ Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes
 
 ## Contato
 
-Para dúvidas, sugestões ou suporte, entre em contato pelo e-mail: [seuemail@dominio.com]
+Para dúvidas, sugestões ou suporte, entre em contato pelo e-mail: [kalielmendesdasilva@gmail.com]
