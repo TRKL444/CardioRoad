@@ -57,13 +57,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
     if (_formKey.currentState!.validate()) {
+      // 1. Pega o número de telefone do controller.
+      final String phoneNumber = _phoneController.text;
+
+      // 2. Remove a máscara para obter apenas os números.
+      final String unmaskedPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+
+      // 3. Pega os QUATRO últimos dígitos do número.
+      String loginCode = "";
+      if (unmaskedPhone.length >= 4) {
+        loginCode = unmaskedPhone.substring(unmaskedPhone.length - 4);
+      }
+
+      /*
+      IMPORTANTE:
+      Neste ponto, você deve salvar os dados no seu banco de dados.
+      - O 'usuário' para login será a variável `loginCode`.
+      - A 'senha' para login será a de `_passwordController.text`.
+      - O email de `_emailController.text` deve ser salvo como um dado de contato,
+        mas não será mais usado para o login.
+      */
+
+      // Apenas para fins de teste, vamos imprimir os valores.
+      print('============================================');
+      print('Formulário de Registo Válido!');
+      print('Email de Contato: ${_emailController.text}');
+      print('Novo "Usuário" de Login: $loginCode'); // Agora com 4 dígitos
+      print('Senha: ${_passwordController.text}');
+      print('============================================');
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Registo realizado com sucesso!'),
+          content: Text(
+            'Registo realizado com sucesso! Use os 4 últimos dígitos do seu celular para fazer login.',
+          ),
           backgroundColor: AppColors.success,
+          duration: Duration(seconds: 5),
         ),
       );
-      print('Formulário Válido!');
     }
   }
 

@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       print('Formulário de login válido!');
       print('Email: ${_emailController.text}');
-      // TODO: Implementar a lógica de autenticação
+      // TODO: Implementar a lógica de autenticação usando Firebase Auth ou integração com backend próprio
     }
   }
 
@@ -109,9 +109,10 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               CustomTextFormField(
                 controller: _emailController,
-                labelText: 'Your Email',
-                keyboardType: TextInputType.emailAddress,
-                validator: Validators.validateEmail,
+                labelText: 'Codigo de acesso',
+                hintText: 'Os 4 últimos dígitos do seu celular',
+                keyboardType: TextInputType.number,
+                validator: Validators.validateLoginCode,
               ),
               const SizedBox(height: 16),
               CustomTextFormField(
@@ -181,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         GestureDetector(
           onTap: () {
-            // TODO: Implementar lógica de "Esqueceu a palavra-passe?"
+            // Navegar para a tela de redefinição de senha ou mostrar um diálogo de recuperação de senha
           },
           child: const Text(
             'Forgot password?',
