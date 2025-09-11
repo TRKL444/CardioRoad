@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cardioroad/core/validators/validators.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/widgets/CustomTextFormField.dart';
-import 'package:cardioroad/page/signup_screen.dart'; // Importamos a tela de registo para navegação
+import 'package:cardioroad/page/signup_screen.dart';
+import 'package:cardioroad/page/telaPrincipal.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,7 +14,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  // Controller renomeado para maior clareza
+  final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
@@ -21,16 +23,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _loginCodeController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _submitForm() {
+    // Esconde o teclado para uma melhor experiência do usuário
+    FocusScope.of(context).unfocus();
+
     if (_formKey.currentState!.validate()) {
+      // TODO: Implementar a lógica de autenticação real aqui.
+      // Você vai verificar se o _loginCodeController.text e _passwordController.text
+      // correspondem a um usuário válido no seu banco de dados.
+
       print('Formulário de login válido!');
-      print('Email: ${_emailController.text}');
-      // TODO: Implementar a lógica de autenticação usando Firebase Auth ou integração com backend próprio
+      print('Código de Acesso: ${_loginCodeController.text}');
+
+      // Simula um login bem-sucedido e navega para a HomeScreen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     }
   }
 
@@ -61,19 +74,16 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              color: AppColors.white,
-              size: 28,
-            ),
-            onPressed: () {},
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-          const SizedBox(height: 20),
+          // Ícone de voltar pode ser útil se essa tela for acessível de outros lugares
+          // IconButton(
+          //   icon: const Icon(Icons.arrow_back, color: AppColors.white, size: 28),
+          //   onPressed: () => Navigator.of(context).pop(),
+          //   padding: EdgeInsets.zero,
+          //   constraints: const BoxConstraints(),
+          // ),
+          // const SizedBox(height: 20),
           const Text(
-            "Welcome Back",
+            "Bem-vindo(a) de volta",
             style: TextStyle(
               color: AppColors.white,
               fontSize: 32,
@@ -82,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Sign in to your account',
+            'Acesse sua conta para continuar',
             style: TextStyle(color: AppColors.greyText, fontSize: 18),
           ),
         ],
@@ -107,17 +117,19 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
+              // Campo para o código de acesso de 4 dígitos
               CustomTextFormField(
-                controller: _emailController,
-                labelText: 'Codigo de acesso',
+                controller: _loginCodeController,
+                labelText: 'Código de Acesso',
                 hintText: 'Os 4 últimos dígitos do seu celular',
                 keyboardType: TextInputType.number,
                 validator: Validators.validateLoginCode,
               ),
               const SizedBox(height: 16),
+              // Campo para a senha
               CustomTextFormField(
                 controller: _passwordController,
-                labelText: 'Password',
+                labelText: 'Senha',
                 obscureText: !_isPasswordVisible,
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -134,6 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               _buildRememberMeAndForgotPassword(),
               const SizedBox(height: 24),
+              // Botão de Entrar
               ElevatedButton(
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
@@ -144,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 child: const Text(
-                  'Sign In',
+                  'Entrar',
                   style: TextStyle(fontSize: 18, color: AppColors.white),
                 ),
               ),
@@ -175,17 +188,17 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(width: 8),
             const Text(
-              'Remember me',
+              'Lembrar de mim',
               style: TextStyle(color: AppColors.greyText),
             ),
           ],
         ),
         GestureDetector(
           onTap: () {
-            // Navegar para a tela de redefinição de senha ou mostrar um diálogo de recuperação de senha
+            // TODO: Implementar lógica de "Esqueceu a senha?"
           },
           child: const Text(
-            'Forgot password?',
+            'Esqueceu a senha?',
             style: TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -201,13 +214,13 @@ class _LoginScreenState extends State<LoginScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-          "I'm a new user. ",
+          "Não tem uma conta? ",
           style: TextStyle(color: AppColors.greyText),
         ),
         GestureDetector(
           onTap: _navigateToSignUp,
           child: const Text(
-            "Sign Up",
+            "Cadastre-se",
             style: TextStyle(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
