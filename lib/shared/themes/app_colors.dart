@@ -17,4 +17,8 @@ class AppColors {
   static const Color error = Colors.redAccent;
   static const Color success = Colors.green;
   static const Color warning = Colors.orangeAccent;
+
+  static Color? darkText;
+
+  static Color? get lightGreyBackground => null;
 }
