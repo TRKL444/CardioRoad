@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+// IMPORTAÇÃO ADICIONADA PARA O PACOTE DE ÍCONES
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // Importa todos os ficheiros necessários para a tela funcionar
 import 'package:cardioroad/core/validators/validators.dart';
+import 'package:cardioroad/page/pageLogin.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/widgets/CustomTextFormField.dart';
 import 'package:cardioroad/widgets/signup_buttons.dart';
@@ -46,7 +49,72 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
+  void _showFakeWhatsAppNotification(BuildContext context, String loginCode) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        duration: const Duration(seconds: 8),
+        content: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDF8F5),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.green.shade200, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // ÍCONE DO WHATSAPP CORRIGIDO
+              const FaIcon(
+                FontAwesomeIcons.whatsapp,
+                color: Colors.green,
+                size: 40,
+              ),
+              const SizedBox(width: 15),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      "WhatsApp",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "CardioRoad: Seu código de acesso é *$loginCode*.",
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _submitForm() {
+    FocusScope.of(context).unfocus();
+
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -57,44 +125,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
     if (_formKey.currentState!.validate()) {
-      // 1. Pega o número de telefone do controller.
-      final String phoneNumber = _phoneController.text;
-
-      // 2. Remove a máscara para obter apenas os números.
-      final String unmaskedPhone = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-
-      // 3. Pega os QUATRO últimos dígitos do número.
+      final String unmaskedPhone = _phoneController.text.replaceAll(
+        RegExp(r'[^\d]'),
+        '',
+      );
       String loginCode = "";
       if (unmaskedPhone.length >= 4) {
         loginCode = unmaskedPhone.substring(unmaskedPhone.length - 4);
       }
 
-      /*
-      IMPORTANTE:
-      Neste ponto, você deve salvar os dados no seu banco de dados.
-      - O 'usuário' para login será a variável `loginCode`.
-      - A 'senha' para login será a de `_passwordController.text`.
-      - O email de `_emailController.text` deve ser salvo como um dado de contato,
-        mas não será mais usado para o login.
-      */
+      _showFakeWhatsAppNotification(context, loginCode);
 
-      // Apenas para fins de teste, vamos imprimir os valores.
       print('============================================');
       print('Formulário de Registo Válido!');
       print('Email de Contato: ${_emailController.text}');
-      print('Novo "Usuário" de Login: $loginCode'); // Agora com 4 dígitos
+      print('Novo "Usuário" de Login: $loginCode');
       print('Senha: ${_passwordController.text}');
       print('============================================');
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Registo realizado com sucesso! Use os 4 últimos dígitos do seu celular para fazer login.',
-          ),
-          backgroundColor: AppColors.success,
-          duration: Duration(seconds: 5),
-        ),
-      );
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
+        }
+      });
     }
   }
 
@@ -107,7 +162,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // AGORA USAMOS OS WIDGETS QUE VOCÊ CRIOU
               const SignUpHeader(),
               Container(
                 decoration: const BoxDecoration(
@@ -143,8 +197,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           labelText: 'Telefone',
                           keyboardType: TextInputType.phone,
                           inputFormatters: [_phoneMask],
-                          validator: (value) =>
-                              Validators.validatePhone(value, _phoneMask),
+                          // CHAMADA DO VALIDADOR CORRIGIDA
+                          validator: Validators.validatePhone,
                         ),
                         const SizedBox(height: 16),
                         CustomTextFormField(
@@ -152,8 +206,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           labelText: 'CPF',
                           keyboardType: TextInputType.number,
                           inputFormatters: [_cpfMask],
-                          validator: (value) =>
-                              Validators.validateCpf(value, _cpfMask),
+                          // CHAMADA DO VALIDADOR CORRIGIDA
+                          validator: Validators.validateCpf,
                         ),
                         const SizedBox(height: 16),
                         CustomTextFormField(
