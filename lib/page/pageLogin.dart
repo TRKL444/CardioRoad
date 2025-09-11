@@ -4,6 +4,8 @@ import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/widgets/CustomTextFormField.dart';
 import 'package:cardioroad/page/signup_screen.dart';
 import 'package:cardioroad/page/telaPrincipal.dart';
+import 'package:cardioroad/page/telaMapa.dart';
+import 'package:cardioroad/page/historioMedicoes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
