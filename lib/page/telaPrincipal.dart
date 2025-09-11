@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/page/pageLogin.dart';
+
+// CORREÇÃO: Ajustado o nome do arquivo para corresponder ao padrão.
+import 'package:cardioroad/page/historio_medicoes.dart';
+import 'package:cardioroad/page/signup_screen.dart';
+import 'package:cardioroad/page/map_screen.dart';
+
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -11,13 +17,73 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Placeholder para o nome do usuário, que viria do banco de dados no futuro.
+  // Usamos uma variável final para o nome, que no futuro virá do login/banco de dados.
   final String userName = "Nathalia";
+  String _currentGlucoseValue = "---";
+  String _lastMeasurementStatus = "Nenhuma medição hoje";
 
   void _logout() {
-    // Navega de volta para a tela de login, substituindo a tela home.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  // Função para mostrar o modal de adicionar nova medição
+  void _showAddMeasurementSheet() {
+    final controller = TextEditingController();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Text(
+                'Adicionar Nova Medição',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Valor da glicemia (mg/dL)',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  if (controller.text.isNotEmpty) {
+                    setState(() {
+                      _currentGlucoseValue = controller.text;
+                      _lastMeasurementStatus = "Última medição: Agora";
+                    });
+                    Navigator.of(context).pop(); // Fecha o modal
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text('Salvar Medição', style: TextStyle(color: Colors.white, fontSize: 16)),
+              )
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -70,8 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(color: AppColors.greyText, fontSize: 18),
         ),
         Text(
-          userName,
-          // REMOVIDO 'const' DAQUI
+          userName, // Usando a variável de estado
           style: TextStyle(
             color: AppColors.darkText,
             fontSize: 32,
@@ -104,25 +169,22 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: AppColors.white, fontSize: 16),
             ),
             const SizedBox(height: 12),
-            const Text(
-              '--- mg/dL',
-              style: TextStyle(
+            Text(
+              '$_currentGlucoseValue mg/dL',
+              style: const TextStyle(
                 color: AppColors.white,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
-            // REMOVIDO 'const' DO WIDGET TEXT
             Text(
-              'Nenhuma medição hoje',
+              _lastMeasurementStatus,
               style: TextStyle(color: AppColors.lightGreyBackground),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () {
-                // TODO: Implementar lógica para adicionar nova medição.
-              },
+              onPressed: _showAddMeasurementSheet, // Lógica para adicionar medição
               icon: const Icon(Icons.add, color: AppColors.primary),
               label: const Text(
                 'Adicionar Nova Medição',
@@ -149,7 +211,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActionsTitle() {
-    // REMOVIDO 'const' DAQUI
     return Text(
       'Ações Rápidas',
       style: TextStyle(
@@ -172,14 +233,20 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: FontAwesomeIcons.chartLine,
           label: 'Histórico de Medições',
           onTap: () {
-            // TODO: Navegar para a tela de histórico.
+            // REDIRECIONAMENTO PARA A TELA DE HISTÓRICO
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => HistoryScreen()),
+            );
           },
         ),
         _buildActionButton(
           icon: FontAwesomeIcons.hospital,
           label: 'Encontrar Postos de Saúde',
           onTap: () {
-            // TODO: Navegar para a tela do mapa.
+            // REDIRECIONAMENTO PARA A TELA DO MAPA
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => const MapScreen()),
+            );
           },
         ),
       ],
@@ -206,7 +273,6 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               label,
               textAlign: TextAlign.center,
-              // REMOVIDO 'const' DAQUI
               style: TextStyle(
                 color: AppColors.darkText,
                 fontWeight: FontWeight.w600,
@@ -218,3 +284,4 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+

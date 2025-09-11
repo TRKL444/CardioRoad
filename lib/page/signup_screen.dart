@@ -75,11 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: Row(
             children: [
               // ÍCONE DO WHATSAPP CORRIGIDO
-              const FaIcon(
-                FontAwesomeIcons.whatsapp,
-                color: Colors.green,
-                size: 40,
-              ),
+              const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.green, size: 40),
               const SizedBox(width: 15),
               Expanded(
                 child: Column(
@@ -97,10 +93,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     const SizedBox(height: 4),
                     Text(
                       "CardioRoad: Seu código de acesso é *$loginCode*.",
-                      style: const TextStyle(
-                        color: Colors.black87,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Colors.black87, fontSize: 14),
                     ),
                   ],
                 ),
@@ -125,10 +118,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
     if (_formKey.currentState!.validate()) {
-      final String unmaskedPhone = _phoneController.text.replaceAll(
-        RegExp(r'[^\d]'),
-        '',
-      );
+      final String unmaskedPhone =
+          _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
       String loginCode = "";
       if (unmaskedPhone.length >= 4) {
         loginCode = unmaskedPhone.substring(unmaskedPhone.length - 4);
@@ -138,6 +129,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       print('============================================');
       print('Formulário de Registo Válido!');
+      print('Registo de Novo Usuário');
+      print('Nome Completo: ${_nameController.text}');
       print('Email de Contato: ${_emailController.text}');
       print('Novo "Usuário" de Login: $loginCode');
       print('Senha: ${_passwordController.text}');
