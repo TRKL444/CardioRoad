@@ -39,6 +39,8 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   google_maps_flutter: ^2.13.1
   url_launcher: ^6.3.2
+  geolocator: ^11.0.0 # Para obter a localização do utilizador
+  http: ^1.2.1   
 
 
 dev_dependencies:
