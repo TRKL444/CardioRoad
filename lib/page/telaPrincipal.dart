@@ -3,7 +3,7 @@ import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/page/pageLogin.dart';
 
 // Importamos as telas necessárias
-import 'package:cardioroad/page/historio_medicoes.dart';
+import 'package:cardioroad/features/history/history_screen.dart';
 import 'package:cardioroad/features/settings/settings_screen.dart'; // IMPORTAÇÃO DA NOVA TELA
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
