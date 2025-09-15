@@ -4,7 +4,8 @@ import 'package:cardioroad/page/pageLogin.dart';
 
 // Importamos as telas necessárias
 import 'package:cardioroad/features/history/history_screen.dart';
-import 'package:cardioroad/features/settings/settings_screen.dart'; // IMPORTAÇÃO DA NOVA TELA
+import 'package:cardioroad/features/settings/settings_screen.dart';
+import 'package:cardioroad/features/emergency/emergency_screen.dart'; // IMPORTAÇÃO DA NOVA TELA
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -123,7 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Painel de Controle', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.white),
         actions: [
-          // ÍCONE DE CONFIGURAÇÕES ADICIONADO AQUI
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Configurações',
@@ -210,30 +210,46 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActionsTitle() {
-    return  Text('Ações Rápidas', style: TextStyle(color: AppColors.darkText, fontSize: 20, fontWeight: FontWeight.bold));
+    return Text('Ações Rápidas', style: TextStyle(color: AppColors.darkText, fontSize: 20, fontWeight: FontWeight.bold));
   }
-
+  
+  // WIDGET DE AÇÕES RÁPIDAS ATUALIZADO
   Widget _buildActionButtons() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
+    return Column(
       children: [
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                icon: FontAwesomeIcons.chartLine,
+                label: 'Histórico',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const HistoryScreen()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildActionButton(
+                icon: FontAwesomeIcons.hospital,
+                label: 'Postos de Saúde',
+                onTap: _openGoogleMapsSearch,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // BOTÃO DE EMERGÊNCIA ADICIONADO AQUI
         _buildActionButton(
-          icon: FontAwesomeIcons.chartLine,
-          label: 'Histórico de Medições',
+          icon: FontAwesomeIcons.kitMedical,
+          label: 'Ficha de Emergência',
           onTap: () {
             Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => HistoryScreen()),
+              MaterialPageRoute(builder: (context) => EmergencyScreen()),
             );
           },
-        ),
-        _buildActionButton(
-          icon: FontAwesomeIcons.hospital,
-          label: 'Encontrar Postos de Saúde',
-          onTap: _openGoogleMapsSearch,
         ),
       ],
     );
@@ -247,13 +263,16 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 2,
         shadowColor: Colors.black.withOpacity(0.1),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            FaIcon(icon, size: 40, color: AppColors.primary),
-            const SizedBox(height: 12),
-            Text(label, textAlign: TextAlign.center, style:  TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600)),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(icon, size: 40, color: AppColors.primary),
+              const SizedBox(height: 12),
+              Text(label, textAlign: TextAlign.center, style: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600)),
+            ],
+          ),
         ),
       ),
     );
