@@ -4,7 +4,6 @@ import 'package:cardioroad/page/pageLogin.dart';
 
 // CORREÇÃO: Ajustado o nome do arquivo para corresponder ao padrão.
 import 'package:cardioroad/page/historio_medicoes.dart';
-import 'package:cardioroad/page/signup_screen.dart';
 import 'package:cardioroad/page/map_screen.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';

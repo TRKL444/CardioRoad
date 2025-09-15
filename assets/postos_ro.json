@@ -1,0 +1,38 @@
+[
+  {
+    "nome_do_estabelecimento": "ASTIR",
+    "no_logradouro": "RUA PAULO LEAL",
+    "municipio": "PORTO VELHO",
+    "latitude": "-8.7612",
+    "longitude": "-63.9038"
+  },
+  {
+    "nome_do_estabelecimento": "HOSPITAL CEMETRON",
+    "no_logradouro": "AV GUAPORE",
+    "municipio": "PORTO VELHO",
+    "latitude": "-8.76559",
+    "longitude": "-63.87301"
+  },
+  {
+    "nome_do_estabelecimento": "HOSPITAL JOAO PAULO II PORTO VELHO",
+    "no_logradouro": "AVENIDA CAMPOS SALES",
+    "municipio": "PORTO VELHO",
+    "latitude": "-8.7618",
+    "longitude": "-63.8795"
+  },
+  {
+    "nome_do_estabelecimento": "HOSPITAL DE BASE PORTO VELHO",
+    "no_logradouro": "AV JORGE TEIXEIRA",
+    "municipio": "PORTO VELHO",
+    "latitude": "-8.7513",
+    "longitude": "-63.8824"
+  },
+  {
+    "nome_do_estabelecimento": "HOSPITAL SANTA MARCELINA DE RONDONIA",
+    "no_logradouro": "BR 364 KM 17",
+    "municipio": "PORTO VELHO",
+    "latitude": "-8.8475",
+    "longitude": "-63.9872"
+  }
+]
+
