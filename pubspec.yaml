@@ -40,9 +40,11 @@ dependencies:
   google_maps_flutter: ^2.13.1
   url_launcher: ^6.3.2
   geolocator: ^11.0.0 # Para obter a localização do utilizador
-  http: ^1.2.1   
-  flutter_map: ^6.1.0
-  latlong2: ^0.9.0
+  #mapbox_gl: ^0.16.0
+  
+# http: ^1.2.1   
+# flutter_map: ^6.1.0
+# latlong2: ^0.9.0
 
 
 dev_dependencies:

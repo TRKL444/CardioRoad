@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/page/pageLogin.dart';
 
-// CORREÇÃO: Ajustado o nome do arquivo para corresponder ao padrão.
-import 'package:cardioroad/page/historio_medicoes.dart';
-import 'package:cardioroad/page/map_screen.dart';
-
+// Importamos os pacotes e telas necessários
+import 'package:cardioroad/page/historio_medicoes.dart'; // NOME DO ARQUIVO CORRIGIDO
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Usamos uma variável final para o nome, que no futuro virá do login/banco de dados.
   final String userName = "Nathalia";
   String _currentGlucoseValue = "---";
   String _lastMeasurementStatus = "Nenhuma medição hoje";
@@ -27,7 +26,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Função para mostrar o modal de adicionar nova medição
+  // Função para abrir o Google Maps e pesquisar por postos de saúde
+  Future<void> _openGoogleMapsSearch() async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Obtendo sua localização para abrir o mapa...')),
+    );
+
+    try {
+      // 1. Obtemos a localização para garantir que o GPS está ativo e para ter a posição mais recente
+      await _determinePosition();
+      
+      // 2. Criamos uma URL de pesquisa. O app Google Maps usará a localização atual do dispositivo.
+      const query = 'posto de saúde';
+      final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
+
+      // 3. Tentamos abrir a URL no aplicativo externo do Google Maps
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Não foi possível abrir o Google Maps. Verifique se ele está instalado.';
+      }
+
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro: ${e.toString().replaceAll("Exception: ", "")}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // A função de adicionar medição permanece a mesma
   void _showAddMeasurementSheet() {
     final controller = TextEditingController();
     showModalBottomSheet(
@@ -67,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       _currentGlucoseValue = controller.text;
                       _lastMeasurementStatus = "Última medição: Agora";
                     });
-                    Navigator.of(context).pop(); // Fecha o modal
+                    Navigator.of(context).pop();
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -93,17 +125,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.darkBackground,
         elevation: 0,
-        title: const Text(
-          'Painel de Controle',
-          style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Painel de Controle', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.white),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            tooltip: 'Sair',
-            onPressed: _logout,
-          ),
+          IconButton(icon: const Icon(Icons.logout), tooltip: 'Sair', onPressed: _logout),
         ],
       ),
       body: SingleChildScrollView(
@@ -126,22 +151,13 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Os widgets auxiliares (welcome, glucose, etc.) permanecem os mesmos
   Widget _buildWelcomeHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Bem-vinda de volta,',
-          style: TextStyle(color: AppColors.greyText, fontSize: 18),
-        ),
-        Text(
-          userName, // Usando a variável de estado
-          style: TextStyle(
-            color: AppColors.darkText,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text('Bem-vinda de volta,', style: TextStyle(color: AppColors.greyText, fontSize: 18)),
+        Text(userName, style: TextStyle(color: AppColors.darkText, fontSize: 32, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -163,46 +179,22 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Column(
           children: [
-            const Text(
-              'Seu nível de glicemia atual',
-              style: TextStyle(color: AppColors.white, fontSize: 16),
-            ),
+            const Text('Seu nível de glicemia atual', style: TextStyle(color: AppColors.white, fontSize: 16)),
             const SizedBox(height: 12),
-            Text(
-              '$_currentGlucoseValue mg/dL',
-              style: const TextStyle(
-                color: AppColors.white,
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text('$_currentGlucoseValue mg/dL', style: const TextStyle(color: AppColors.white, fontSize: 48, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
-            Text(
-              _lastMeasurementStatus,
-              style: TextStyle(color: AppColors.lightGreyBackground),
-            ),
+            Text(_lastMeasurementStatus, style: TextStyle(color: AppColors.lightGreyBackground)),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: _showAddMeasurementSheet, // Lógica para adicionar medição
+              onPressed: _showAddMeasurementSheet,
               icon: const Icon(Icons.add, color: AppColors.primary),
-              label: const Text(
-                'Adicionar Nova Medição',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              label: const Text('Adicionar Nova Medição', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -210,14 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildQuickActionsTitle() {
-    return Text(
-      'Ações Rápidas',
-      style: TextStyle(
-        color: AppColors.darkText,
-        fontSize: 20,
-        fontWeight: FontWeight.bold,
-      ),
-    );
+    return  Text('Ações Rápidas', style: TextStyle(color: AppColors.darkText, fontSize: 20, fontWeight: FontWeight.bold));
   }
 
   Widget _buildActionButtons() {
@@ -232,7 +217,6 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: FontAwesomeIcons.chartLine,
           label: 'Histórico de Medições',
           onTap: () {
-            // REDIRECIONAMENTO PARA A TELA DE HISTÓRICO
             Navigator.of(context).push(
               MaterialPageRoute(builder: (context) => HistoryScreen()),
             );
@@ -241,22 +225,13 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildActionButton(
           icon: FontAwesomeIcons.hospital,
           label: 'Encontrar Postos de Saúde',
-          onTap: () {
-            // REDIRECIONAMENTO PARA A TELA DO MAPA
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const MapScreen()),
-            );
-          },
+          onTap: _openGoogleMapsSearch,
         ),
       ],
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildActionButton({required IconData icon, required String label, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -269,18 +244,32 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             FaIcon(icon, size: 40, color: AppColors.primary),
             const SizedBox(height: 12),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.darkText,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            Text(label, textAlign: TextAlign.center, style: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
     );
+  }
+  
+  // Função para pedir e obter a localização
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Os serviços de localização estão desativados. Por favor, ative o GPS.');
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('As permissões de localização foram negadas.');
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('As permissões de localização foram negadas permanentemente.');
+    }
+    return await Geolocator.getCurrentPosition();
   }
 }
 
