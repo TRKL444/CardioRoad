@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/page/pageLogin.dart';
 
-// Importamos os pacotes e telas necessários
-import 'package:cardioroad/page/historio_medicoes.dart'; // NOME DO ARQUIVO CORRIGIDO
+// Importamos as telas necessárias
+import 'package:cardioroad/page/historio_medicoes.dart';
+import 'package:cardioroad/features/settings/settings_screen.dart'; // IMPORTAÇÃO DA NOVA TELA
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,25 +27,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Função para abrir o Google Maps e pesquisar por postos de saúde
   Future<void> _openGoogleMapsSearch() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Obtendo sua localização para abrir o mapa...')),
     );
 
     try {
-      // 1. Obtemos a localização para garantir que o GPS está ativo e para ter a posição mais recente
       await _determinePosition();
-      
-      // 2. Criamos uma URL de pesquisa. O app Google Maps usará a localização atual do dispositivo.
       const query = 'posto de saúde';
       final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
 
-      // 3. Tentamos abrir a URL no aplicativo externo do Google Maps
       if (await canLaunchUrl(url)) {
         await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
-        throw 'Não foi possível abrir o Google Maps. Verifique se ele está instalado.';
+        throw 'Não foi possível abrir o Google Maps.';
       }
 
     } catch (e) {
@@ -59,7 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // A função de adicionar medição permanece a mesma
   void _showAddMeasurementSheet() {
     final controller = TextEditingController();
     showModalBottomSheet(
@@ -128,7 +123,21 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Painel de Controle', style: TextStyle(color: AppColors.white, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: AppColors.white),
         actions: [
-          IconButton(icon: const Icon(Icons.logout), tooltip: 'Sair', onPressed: _logout),
+          // ÍCONE DE CONFIGURAÇÕES ADICIONADO AQUI
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Configurações',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Sair',
+            onPressed: _logout,
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -151,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Os widgets auxiliares (welcome, glucose, etc.) permanecem os mesmos
   Widget _buildWelcomeHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -244,14 +252,13 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             FaIcon(icon, size: 40, color: AppColors.primary),
             const SizedBox(height: 12),
-            Text(label, textAlign: TextAlign.center, style: TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600)),
+            Text(label, textAlign: TextAlign.center, style:  TextStyle(color: AppColors.darkText, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
     );
   }
   
-  // Função para pedir e obter a localização
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
