@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/page/pageLogin.dart';
-
-// 1. IMPORTAMOS AS PÁGINAS PARA AS QUAIS VAMOS NAVEGAR
-import 'package:cardioroad/page/historioMedicoes.dart';
-import 'package:cardioroad/page/telaMapa.dart';
-
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,81 +11,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // Placeholder para o nome do usuário, que viria do banco de dados no futuro.
   final String userName = "Nathalia";
-  String _currentGlucoseValue = "---";
-  String _lastMeasurementStatus = "Nenhuma medição hoje";
 
-  // FUNÇÃO DE LOGOUT QUE REDIRECIONA PARA A TELA DE LOGIN
   void _logout() {
+    // Navega de volta para a tela de login, substituindo a tela home.
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
-  }
-
-  // FUNÇÃO PARA MOSTRAR O MODAL DE ADICIONAR MEDIÇÃO
-  void _showAddMeasurementSheet() {
-    final controller = TextEditingController();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            MediaQuery.of(context).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Adicionar Nova Medição',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-              TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Valor da glicemia (mg/dL)',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  if (controller.text.isNotEmpty) {
-                    setState(() {
-                      _currentGlucoseValue = controller.text;
-                      _lastMeasurementStatus = "Última medição: Agora";
-                    });
-                    Navigator.of(context).pop(); // Fecha o modal
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  'Salvar Medição',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -134,7 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // WIDGET DE CABEÇALHO DE BOAS-VINDAS
   Widget _buildWelcomeHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Text(
           userName,
+          // REMOVIDO 'const' DAQUI
           style: TextStyle(
             color: AppColors.darkText,
             fontSize: 32,
@@ -155,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // WIDGET DO CARD DE GLICEMIA
   Widget _buildGlucoseCard() {
     return Card(
       elevation: 4,
@@ -178,22 +104,25 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(color: AppColors.white, fontSize: 16),
             ),
             const SizedBox(height: 12),
-            Text(
-              '$_currentGlucoseValue mg/dL',
-              style: const TextStyle(
+            const Text(
+              '--- mg/dL',
+              style: TextStyle(
                 color: AppColors.white,
                 fontSize: 48,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
+            // REMOVIDO 'const' DO WIDGET TEXT
             Text(
-              _lastMeasurementStatus,
+              'Nenhuma medição hoje',
               style: TextStyle(color: AppColors.lightGreyBackground),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: _showAddMeasurementSheet,
+              onPressed: () {
+                // TODO: Implementar lógica para adicionar nova medição.
+              },
               icon: const Icon(Icons.add, color: AppColors.primary),
               label: const Text(
                 'Adicionar Nova Medição',
@@ -219,8 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // WIDGET DO TÍTULO "AÇÕES RÁPIDAS"
   Widget _buildQuickActionsTitle() {
+    // REMOVIDO 'const' DAQUI
     return Text(
       'Ações Rápidas',
       style: TextStyle(
@@ -231,7 +160,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // WIDGET DOS BOTÕES DE AÇÃO COM A LÓGICA DE NAVEGAÇÃO
   Widget _buildActionButtons() {
     return GridView.count(
       crossAxisCount: 2,
@@ -244,25 +172,20 @@ class _HomeScreenState extends State<HomeScreen> {
           icon: FontAwesomeIcons.chartLine,
           label: 'Histórico de Medições',
           onTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => HistoryScreen()));
+            // TODO: Navegar para a tela de histórico.
           },
         ),
         _buildActionButton(
           icon: FontAwesomeIcons.hospital,
           label: 'Encontrar Postos de Saúde',
           onTap: () {
-            Navigator.of(
-              context,
-            ).push(MaterialPageRoute(builder: (context) => const MapScreen()));
+            // TODO: Navegar para a tela do mapa.
           },
         ),
       ],
     );
   }
 
-  // WIDGET AUXILIAR PARA CRIAR CADA BOTÃO DE AÇÃO
   Widget _buildActionButton({
     required IconData icon,
     required String label,
@@ -283,6 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               label,
               textAlign: TextAlign.center,
+              // REMOVIDO 'const' DAQUI
               style: TextStyle(
                 color: AppColors.darkText,
                 fontWeight: FontWeight.w600,
