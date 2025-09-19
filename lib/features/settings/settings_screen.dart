@@ -52,7 +52,7 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (bool value) {
                 // TODO: Implementar lógica do switch
               },
-              activeColor: AppColors.primary,
+              activeThumbColor: AppColors.primary,
             ),
             onTap: () {},
           ),
