@@ -69,8 +69,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24.0, 60.0, 24.0, 24.0),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(24.0, 60.0, 24.0, 24.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
           //   constraints: const BoxConstraints(),
           // ),
           // const SizedBox(height: 20),
-          const Text(
+          Text(
             "Bem-vindo(a) de volta",
             style: TextStyle(
               color: AppColors.white,
@@ -90,8 +90,8 @@ class _LoginScreenState extends State<LoginScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 8),
+          Text(
             'Acesse sua conta para continuar',
             style: TextStyle(color: AppColors.greyText, fontSize: 18),
           ),

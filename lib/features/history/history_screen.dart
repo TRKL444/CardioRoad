@@ -68,7 +68,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
           // LISTA DE MEDIÇÕES
            Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(

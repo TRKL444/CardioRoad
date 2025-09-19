@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Bem-vinda de volta,', style: TextStyle(color: AppColors.greyText, fontSize: 18)),
+        const Text('Bem-vinda de volta,', style: TextStyle(color: AppColors.greyText, fontSize: 18)),
         Text(userName, style: TextStyle(color: AppColors.darkText, fontSize: 32, fontWeight: FontWeight.bold)),
       ],
     );

@@ -33,7 +33,7 @@ class SignUpButtons extends StatelessWidget {
         const SizedBox(height: 16),
         OutlinedButton.icon(
           onPressed: onGoogleSignUpPressed,
-          icon: Icon(Icons.g_mobiledata_outlined, color: Colors.red),
+          icon: const Icon(Icons.g_mobiledata_outlined, color: Colors.red),
           label: const Text(
             'Registar com Google',
             style: TextStyle(color: Colors.black54),
