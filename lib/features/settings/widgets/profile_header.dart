@@ -1,5 +1,5 @@
+// TODO Implement this library.
 import 'package:flutter/material.dart';
-import 'package:cardioroad/shared/themes/app_colors.dart';
 
 class ProfileHeader extends StatelessWidget {
   final String userName;
@@ -19,8 +19,7 @@ class ProfileHeader extends StatelessWidget {
         children: [
           const CircleAvatar(
             radius: 50,
-            backgroundColor: AppColors.primary,
-            child: Icon(Icons.person, size: 60, color: Colors.white),
+            child: Icon(Icons.person, size: 60),
           ),
           const SizedBox(height: 16),
           Text(

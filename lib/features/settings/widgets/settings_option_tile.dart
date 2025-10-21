@@ -5,7 +5,7 @@ class SettingsOptionTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final VoidCallback onTap;
-  final Widget? trailing; // Para adicionar um switch ou seta
+  final Widget? trailing;
 
   const SettingsOptionTile({
     super.key,
@@ -20,7 +20,8 @@ class SettingsOptionTile extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),
       title: Text(title, style: const TextStyle(fontSize: 16)),
-      trailing: trailing ?? const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      trailing: trailing ??
+          const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
   }

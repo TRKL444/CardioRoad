@@ -19,7 +19,6 @@ class SettingsScreen extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
       ),
-      backgroundColor: AppColors.lightGreyBackground,
       body: ListView(
         children: [
           const ProfileHeader(
@@ -31,16 +30,12 @@ class SettingsScreen extends StatelessWidget {
           SettingsOptionTile(
             icon: Icons.person_outline,
             title: 'Editar Perfil',
-            onTap: () {
-              // TODO: Navegar para a tela de edição de perfil
-            },
+            onTap: () {},
           ),
           SettingsOptionTile(
             icon: Icons.lock_outline,
-            title: 'Alterar Senha',
-            onTap: () {
-              // TODO: Navegar para a tela de alteração de senha
-            },
+            title: 'Alterar Palavra-passe',
+            onTap: () {},
           ),
           const Divider(),
           _buildSectionHeader('Geral'),
@@ -49,10 +44,8 @@ class SettingsScreen extends StatelessWidget {
             title: 'Notificações',
             trailing: Switch(
               value: true, // Valor de exemplo
-              onChanged: (bool value) {
-                // TODO: Implementar lógica do switch
-              },
-              activeThumbColor: AppColors.primary,
+              onChanged: (bool value) {},
+              activeColor: AppColors.primary,
             ),
             onTap: () {},
           ),
@@ -61,16 +54,12 @@ class SettingsScreen extends StatelessWidget {
           SettingsOptionTile(
             icon: Icons.info_outline,
             title: 'Sobre o CardioRoad',
-            onTap: () {
-              // TODO: Mostrar um dialog com informações do app
-            },
+            onTap: () {},
           ),
           SettingsOptionTile(
             icon: Icons.description_outlined,
             title: 'Termos de Serviço',
-            onTap: () {
-              // TODO: Navegar para a tela de termos de serviço
-            },
+            onTap: () {},
           ),
         ],
       ),

@@ -3,7 +3,7 @@ class EmergencyContact {
   final String relationship; // Ex: Mãe, Médico
   final String phoneNumber;
 
-  EmergencyContact({
+  const EmergencyContact({
     required this.name,
     required this.relationship,
     required this.phoneNumber,

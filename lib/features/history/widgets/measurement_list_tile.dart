@@ -7,15 +7,22 @@ class MeasurementListTile extends StatelessWidget {
 
   const MeasurementListTile({super.key, required this.measurement});
 
+  // Função para determinar a cor com base no valor da glicemia
   Color _getColorForValue(int value) {
-    if (value < 70) return Colors.blue;
-    if (value > 180) return Colors.red;
-    return Colors.green;
+    if (value < 70) {
+      return Colors.blue; // Hipoglicemia
+    }
+    if (value > 180) {
+      return Colors.red; // Hiperglicemia
+    }
+    return Colors.green; // Normal
   }
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('dd/MM/yyyy').format(measurement.timestamp);
+    // Formata a data e a hora para uma apresentação amigável
+    final formattedDate =
+        DateFormat('dd/MM/yyyy').format(measurement.timestamp);
     final formattedTime = DateFormat('HH:mm').format(measurement.timestamp);
 
     return Card(
@@ -24,19 +31,28 @@ class MeasurementListTile extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        // Círculo à esquerda com o valor da medição
         leading: CircleAvatar(
-          backgroundColor: _getColorForValue(measurement.value).withOpacity(0.15),
+          backgroundColor:
+              _getColorForValue(measurement.value).withOpacity(0.15),
           child: Text(
             measurement.value.toString(),
             style: TextStyle(
               color: _getColorForValue(measurement.value),
               fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
         ),
-        title: const Text('Glicemia', style: TextStyle(fontWeight: FontWeight.bold)),
+        // Título e subtítulo (data e hora)
+        title: const Text('Glicemia',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('$formattedDate às $formattedTime'),
-        trailing: Text('mg/dL', style: TextStyle(color: Colors.grey[600])),
+        // Texto "mg/dL" no final
+        trailing: Text(
+          'mg/dL',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
       ),
     );
   }

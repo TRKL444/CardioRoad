@@ -10,18 +10,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Pacotes existentes
+  # Pacotes do Firebase (para o Back-end)
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
+  cloud_firestore: ^4.15.8
+
+  # Pacotes de utilidades e UI
   cupertino_icons: ^1.0.2
   mask_text_input_formatter: ^2.9.0
   cpf_cnpj_validator: ^2.0.0
   font_awesome_flutter: ^10.7.0
   geolocator: ^11.0.0
-  http: ^1.2.1
   url_launcher: ^6.2.5
-
-  # NOVOS PACOTES ADICIONADOS
-  fl_chart: ^0.66.2  # Para os gráficos
-  intl: ^0.19.0      # Para formatar datas (ex: "15/09")
+  fl_chart: ^0.66.2
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -30,6 +32,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Declaração dos assets (arquivos locais)
   assets:
     - assets/postos_ro.json
+
 

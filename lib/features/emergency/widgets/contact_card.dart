@@ -7,21 +7,26 @@ class ContactCard extends StatelessWidget {
 
   const ContactCard({super.key, required this.contact});
 
+  // Função para iniciar a chamada telefónica
   Future<void> _makePhoneCall(BuildContext context) async {
     final Uri launchUri = Uri(
       scheme: 'tel',
       path: contact.phoneNumber,
     );
     try {
+      // Verifica se é possível abrir o link 'tel:'
       if (await canLaunchUrl(launchUri)) {
         await launchUrl(launchUri);
       } else {
         throw 'Não foi possível ligar para ${contact.phoneNumber}';
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-      );
+      // Exibe uma mensagem de erro se a chamada falhar
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -33,10 +38,12 @@ class ContactCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        leading: const CircleAvatar(
-          child: Icon(Icons.person),
+        leading: CircleAvatar(
+          backgroundColor: Colors.grey.shade200,
+          child: const Icon(Icons.person, color: Colors.grey),
         ),
-        title: Text(contact.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(contact.name,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(contact.relationship),
         trailing: IconButton(
           icon: const Icon(Icons.call, color: Colors.green, size: 28),
