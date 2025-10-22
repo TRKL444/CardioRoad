@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:cardioroad/features/auth/screens/signup_screen.dart'; // Define a tela inicial
 
-// As importações do Firebase podem ser comentadas ou mantidas, não faz diferença.
-// import 'package:firebase_core/firebase_core.dart';
-// import 'firebase_options.dart';
+// 1. Importações do Firebase ATIVADAS
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   // Garante que os widgets do Flutter estão prontos
   WidgetsFlutterBinding.ensureInitialized();
 
   // --- ALTERAÇÃO PRINCIPAL ---
-  // Comentamos a inicialização do Firebase para que o app possa rodar
-  // apenas com o front-end. Quando você estiver pronto para conectar
-  // o back-end, basta remover os comentários destas linhas.
-  // await Firebase.initializeApp(
-  //   options: DefaultFirebaseOptions.currentPlatform,
-  // );
+  // Inicialização do Firebase ATIVADA.
+  // Agora seu app está conectado ao back-end.
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const MyApp());
 }

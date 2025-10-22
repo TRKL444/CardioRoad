@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 
+// Importações do Firebase
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class EditMedicalIdScreen extends StatefulWidget {
   // Recebemos os dados atuais para preencher o formulário
   final Map<String, String> initialData;
@@ -18,11 +22,11 @@ class _EditMedicalIdScreenState extends State<EditMedicalIdScreen> {
   late final TextEditingController _doctorController;
 
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Preenche os campos do formulário com os dados recebidos
     _bloodTypeController =
         TextEditingController(text: widget.initialData['bloodType']);
     _allergiesController =
@@ -35,7 +39,6 @@ class _EditMedicalIdScreenState extends State<EditMedicalIdScreen> {
 
   @override
   void dispose() {
-    // Limpa os controllers para evitar fugas de memória
     _bloodTypeController.dispose();
     _allergiesController.dispose();
     _medicationsController.dispose();
@@ -43,18 +46,64 @@ class _EditMedicalIdScreenState extends State<EditMedicalIdScreen> {
     super.dispose();
   }
 
-  void _saveForm() {
-    // Valida o formulário
-    if (_formKey.currentState!.validate()) {
-      // Cria um mapa com os dados atualizados
+  Future<void> _saveForm() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('Nenhum utilizador logado para salvar os dados.');
+      }
+
       final updatedData = {
         'bloodType': _bloodTypeController.text,
         'allergies': _allergiesController.text,
         'medications': _medicationsController.text,
         'doctor': _doctorController.text,
+        'updatedAt':
+            FieldValue.serverTimestamp(), // Guarda a data da última atualização
       };
-      // Fecha a tela e retorna os dados atualizados para a tela anterior (emergency_screen)
-      Navigator.of(context).pop(updatedData);
+
+      // Salva (ou atualiza) os dados como um único documento na sub-coleção 'medical_id'
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('medical_id')
+          .doc(
+              'data') // Usamos um ID fixo para sempre atualizar o mesmo documento
+          .set(
+              updatedData,
+              SetOptions(
+                  merge: true)); // `merge: true` para não apagar outros campos
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Ficha médica salva com sucesso!'),
+              backgroundColor: AppColors.success),
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Erro ao salvar os dados: ${e.toString()}'),
+              backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -64,13 +113,16 @@ class _EditMedicalIdScreenState extends State<EditMedicalIdScreen> {
       appBar: AppBar(
         title: const Text('Editar Ficha Médica'),
         backgroundColor: AppColors.darkBackground,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
-            color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveForm,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.0))
+                : const Icon(Icons.save),
+            onPressed: _isLoading ? null : _saveForm,
             tooltip: 'Salvar',
           ),
         ],
@@ -119,9 +171,14 @@ class _EditMedicalIdScreenState extends State<EditMedicalIdScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 15),
                     textStyle: const TextStyle(fontSize: 16)),
-                onPressed: _saveForm,
-                child: const Text('Salvar Alterações',
-                    style: TextStyle(color: Colors.white)),
+                onPressed: _isLoading ? null : _saveForm,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white))
+                    : const Text('Salvar Alterações',
+                        style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

@@ -3,6 +3,8 @@ import 'package:cardioroad/features/home/home_screen.dart';
 import 'package:cardioroad/shared/core/validators.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -16,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _loginCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -24,22 +27,64 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      // TODO: Implementar a lógica de login com Firebase Auth
-      print('Formulário de login válido!');
-      print('Código de Acesso: ${_loginCodeController.text}');
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      // Navegação para a tela principal após o login
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('loginCode', isEqualTo: _loginCodeController.text.trim())
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw FirebaseAuthException(code: 'user-not-found');
+      }
+
+      final userDoc = querySnapshot.docs.first;
+      final userEmail = userDoc.data()['email'] as String;
+
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: userEmail,
+        password: _passwordController.text.trim(),
+      );
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = 'Ocorreu um erro. Verifique as suas credenciais.';
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == 'invalid-credential') {
+        message = 'Código de acesso ou palavra-passe incorretos.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: AppColors.error),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Ocorreu um erro inesperado.'),
+            backgroundColor: AppColors.error),
       );
     }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _navigateToSignUp() {
-    // Usamos pushReplacement para evitar empilhar telas de login/registo
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (context) => const SignUpScreen()),
     );
@@ -133,17 +178,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 validator: Validators.validatePassword,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: AppColors.primary,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+              if (_isLoading)
+                const Center(child: CircularProgressIndicator())
+              else
+                ElevatedButton(
+                  onPressed: _submitForm,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text('Entrar',
+                      style: TextStyle(fontSize: 18, color: Colors.white)),
                 ),
-                child: const Text('Entrar',
-                    style: TextStyle(fontSize: 18, color: Colors.white)),
-              ),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,

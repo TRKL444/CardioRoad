@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -19,15 +22,23 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
-    defaultConfig {
+  defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.cardioroad"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        
+        // --- MUDANÇA 1 ---
+        // O Firebase exige uma versão mínima de 21.
+        minSdk = flutter.minSdkVersion 
+        
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
+
+        // --- MUDANÇA 2 ---
+        // Habilita o "multidex", necessário para o Firebase.
+        multiDexEnabled = true
     }
 
     buildTypes {

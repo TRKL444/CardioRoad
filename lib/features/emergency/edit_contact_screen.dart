@@ -3,7 +3,7 @@ import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/features/emergency/models/emergency_contact.dart';
 
 class EditContactScreen extends StatefulWidget {
-  // Se um contacto for passado, estamos a editar. Se for nulo, estamos a criar um novo.
+  // Se um contato for passado, estamos a editar. Se for nulo, estamos a criar um novo.
   final EmergencyContact? contact;
 
   const EditContactScreen({super.key, this.contact});
@@ -22,7 +22,7 @@ class _EditContactScreenState extends State<EditContactScreen> {
   @override
   void initState() {
     super.initState();
-    // Preenche os campos com os dados do contacto, se estiver a editar
+    // Preenche os campos com os dados do contato, se estiver a editar
     _nameController = TextEditingController(text: widget.contact?.name);
     _relationshipController =
         TextEditingController(text: widget.contact?.relationship);
@@ -47,7 +47,7 @@ class _EditContactScreenState extends State<EditContactScreen> {
         relationship: _relationshipController.text,
         phoneNumber: _phoneController.text,
       );
-      // Fecha a tela e retorna o contacto (novo ou atualizado) para a tela anterior
+      // Fecha a tela e retorna o contato (novo ou atualizado) para a tela anterior
       Navigator.of(context).pop(newContact);
     }
   }
@@ -57,7 +57,7 @@ class _EditContactScreenState extends State<EditContactScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            widget.contact == null ? 'Adicionar Contacto' : 'Editar Contacto'),
+            widget.contact == null ? 'Adicionar Contato' : 'Editar Contato'),
         backgroundColor: AppColors.darkBackground,
         iconTheme: const IconThemeData(color: Colors.white),
         titleTextStyle: const TextStyle(
@@ -112,7 +112,7 @@ class _EditContactScreenState extends State<EditContactScreen> {
                         horizontal: 50, vertical: 15),
                     textStyle: const TextStyle(fontSize: 16)),
                 onPressed: _saveForm,
-                child: const Text('Salvar Contacto',
+                child: const Text('Salvar Contato',
                     style: TextStyle(color: Colors.white)),
               ),
             ],

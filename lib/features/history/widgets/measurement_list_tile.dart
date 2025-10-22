@@ -1,29 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:cardioroad/features/history/models/glucose_measurement.dart';
+import 'package:cardioroad/features/history/models/health_measurement.dart';
+import 'package:cardioroad/shared/themes/app_colors.dart';
 
 class MeasurementListTile extends StatelessWidget {
-  final GlucoseMeasurement measurement;
+  final HealthMeasurement measurement;
 
   const MeasurementListTile({super.key, required this.measurement});
 
-  // Função para determinar a cor com base no valor da glicemia
-  Color _getColorForValue(int value) {
-    if (value < 70) {
-      return Colors.blue; // Hipoglicemia
-    }
-    if (value > 180) {
-      return Colors.red; // Hiperglicemia
-    }
-    return Colors.green; // Normal
-  }
-
   @override
   Widget build(BuildContext context) {
-    // Formata a data e a hora para uma apresentação amigável
     final formattedDate =
         DateFormat('dd/MM/yyyy').format(measurement.timestamp);
     final formattedTime = DateFormat('HH:mm').format(measurement.timestamp);
+
+    String title = '';
+    String unit = '';
+    IconData icon;
+    Color color;
+
+    // Adapta a UI com base no tipo de medição
+    switch (measurement.type) {
+      case MeasurementType.glicemia:
+        title = 'Glicemia';
+        unit = 'mg/dL';
+        icon = Icons.bloodtype;
+        color = _getColorForGlucose(int.tryParse(measurement.value) ?? 0);
+        break;
+      case MeasurementType.pressaoArterial:
+        title = 'Pressão Arterial';
+        unit = 'mmHg';
+        icon = Icons.favorite_border;
+        color = AppColors.primary;
+        break;
+      case MeasurementType.batimentosCardiacos:
+        title = 'Batimentos Cardíacos';
+        unit = 'BPM';
+        icon = Icons.monitor_heart_outlined;
+        color = AppColors.primary;
+        break;
+    }
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -31,29 +47,27 @@ class MeasurementListTile extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-        // Círculo à esquerda com o valor da medição
         leading: CircleAvatar(
-          backgroundColor:
-              _getColorForValue(measurement.value).withOpacity(0.15),
-          child: Text(
-            measurement.value.toString(),
-            style: TextStyle(
-              color: _getColorForValue(measurement.value),
+          backgroundColor: color.withOpacity(0.15),
+          child: Icon(icon, color: color),
+        ),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text('$formattedDate às $formattedTime'),
+        trailing: Text(
+          '${measurement.value} $unit',
+          style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
-            ),
-          ),
-        ),
-        // Título e subtítulo (data e hora)
-        title: const Text('Glicemia',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Text('$formattedDate às $formattedTime'),
-        // Texto "mg/dL" no final
-        trailing: Text(
-          'mg/dL',
-          style: TextStyle(color: Colors.grey[600]),
+              color: AppColors.darkText),
         ),
       ),
     );
+  }
+
+  // Função específica para as cores da glicemia
+  Color _getColorForGlucose(int value) {
+    if (value < 70) return Colors.blue;
+    if (value > 180) return Colors.red;
+    return Colors.green;
   }
 }

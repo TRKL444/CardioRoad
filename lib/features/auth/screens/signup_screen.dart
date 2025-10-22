@@ -4,6 +4,10 @@ import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
+// Importações do Firebase
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -21,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
 
   final _phoneMask = MaskTextInputFormatter(
       mask: '(##) #####-####', filter: {"#": RegExp(r'[0-9]')});
@@ -38,31 +43,74 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
+  Future<void> _submitForm() async {
     FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      // TODO: Implementar a lógica de registo com Firebase Auth aqui.
-      // Ex: await FirebaseAuth.instance.createUserWithEmailAndPassword(...)
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-      print("Formulário de registo válido!");
-      final phone = _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
-      final loginCode = phone.substring(phone.length - 4);
-      print("Código de acesso gerado: $loginCode");
+    setState(() {
+      _isLoading = true;
+    });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Registo realizado com sucesso! A redirecionar para o login...'),
-          backgroundColor: AppColors.success,
-        ),
+    try {
+      // 1. Criar o utilizador no Firebase Authentication
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
       );
 
-      Future.delayed(const Duration(seconds: 2), () {
+      final user = userCredential.user;
+      if (user != null) {
+        // 2. Gerar o código de acesso
+        final phone = _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
+        final loginCode = phone.substring(phone.length - 4);
+
+        // 3. Guardar os dados do perfil no Cloud Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'name': _nameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'phone': _phoneController.text.trim(),
+          'cpf': _cpfController.text.trim(),
+          'city': _cityController.text.trim(),
+          'loginCode': loginCode,
+          'createdAt': Timestamp.now(),
+        });
+
         if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registo realizado com sucesso!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         }
+      }
+    } on FirebaseAuthException catch (e) {
+      String message = 'Ocorreu um erro. Tente novamente.';
+      if (e.code == 'email-already-in-use') {
+        message = 'Este email já está a ser utilizado.';
+      } else if (e.code == 'weak-password') {
+        message = 'A sua palavra-passe é muito fraca.';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: AppColors.error),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Ocorreu um erro inesperado.'),
+            backgroundColor: AppColors.error),
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
       });
     }
   }
@@ -72,15 +120,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       backgroundColor: AppColors.darkBackground,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeader(),
-              _buildFormContainer(),
-            ],
-          ),
-        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(),
+                    _buildFormContainer(),
+                  ],
+                ),
+              ),
       ),
     );
   }
@@ -127,39 +177,45 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 16),
               TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Nome Completo'),
+                  decoration: const InputDecoration(
+                      labelText: 'Nome Completo', border: OutlineInputBorder()),
                   validator: Validators.validateName),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _emailController,
-                  decoration:
-                      const InputDecoration(labelText: 'Endereço de Email'),
+                  decoration: const InputDecoration(
+                      labelText: 'Endereço de Email',
+                      border: OutlineInputBorder()),
                   keyboardType: TextInputType.emailAddress,
                   validator: Validators.validateEmail),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(labelText: 'Telefone'),
+                  decoration: const InputDecoration(
+                      labelText: 'Telefone', border: OutlineInputBorder()),
                   keyboardType: TextInputType.phone,
                   inputFormatters: [_phoneMask],
                   validator: Validators.validatePhone),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _cpfController,
-                  decoration: const InputDecoration(labelText: 'CPF'),
+                  decoration: const InputDecoration(
+                      labelText: 'CPF', border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   inputFormatters: [_cpfMask],
                   validator: Validators.validateCpf),
               const SizedBox(height: 16),
               TextFormField(
                   controller: _cityController,
-                  decoration: const InputDecoration(labelText: 'Cidade'),
+                  decoration: const InputDecoration(
+                      labelText: 'Cidade', border: OutlineInputBorder()),
                   validator: Validators.validateCity),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: 'Palavra-passe',
+                  border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(_isPasswordVisible
                         ? Icons.visibility
