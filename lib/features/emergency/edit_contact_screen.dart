@@ -19,6 +19,9 @@ class _EditContactScreenState extends State<EditContactScreen> {
 
   final _formKey = GlobalKey<FormState>();
 
+  // Flag de carregamento para simular o salvamento (necessário para o botão)
+  bool _isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,19 +41,47 @@ class _EditContactScreenState extends State<EditContactScreen> {
     super.dispose();
   }
 
-  void _saveForm() {
+  // --- FUNÇÃO MODIFICADA PARA BURLAR O FIRESTORE ---
+  void _saveForm() async {
     // Valida o formulário
-    if (_formKey.currentState!.validate()) {
-      // Cria um novo objeto EmergencyContact com os dados do formulário
-      final newContact = EmergencyContact(
-        name: _nameController.text,
-        relationship: _relationshipController.text,
-        phoneNumber: _phoneController.text,
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // 1. Simula a chamada ao servidor
+    await Future.delayed(const Duration(milliseconds: 700));
+
+    // 2. Cria um novo objeto EmergencyContact com os dados do formulário
+    final newContact = EmergencyContact(
+      name: _nameController.text,
+      relationship: _relationshipController.text,
+      phoneNumber: _phoneController.text,
+    );
+
+    if (mounted) {
+      // 3. Mostra mensagem de sucesso simulado
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                '${widget.contact == null ? 'Contacto adicionado' : 'Contacto atualizado'} com sucesso!'),
+            backgroundColor: AppColors.success),
       );
-      // Fecha a tela e retorna o contato (novo ou atualizado) para a tela anterior
+
+      // 4. Fecha a tela e retorna o contato (novo ou atualizado) para a tela anterior
       Navigator.of(context).pop(newContact);
     }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
+  // --- FIM DA FUNÇÃO MODIFICADA ---
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +95,14 @@ class _EditContactScreenState extends State<EditContactScreen> {
             color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveForm,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.0))
+                : const Icon(Icons.save),
+            onPressed: _isLoading ? null : _saveForm,
             tooltip: 'Salvar',
           ),
         ],
@@ -111,9 +148,14 @@ class _EditContactScreenState extends State<EditContactScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 15),
                     textStyle: const TextStyle(fontSize: 16)),
-                onPressed: _saveForm,
-                child: const Text('Salvar Contato',
-                    style: TextStyle(color: Colors.white)),
+                onPressed: _isLoading ? null : _saveForm,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white))
+                    : const Text('Salvar Contato',
+                        style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

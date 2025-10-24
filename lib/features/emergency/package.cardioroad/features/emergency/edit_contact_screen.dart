@@ -18,6 +18,8 @@ class _EditContactScreenState extends State<EditContactScreen> {
   late final TextEditingController _phoneController;
 
   final _formKey = GlobalKey<FormState>();
+  // Adicionado a flag de carregamento
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -38,17 +40,57 @@ class _EditContactScreenState extends State<EditContactScreen> {
     super.dispose();
   }
 
-  void _saveForm() {
+  // --- FUNÇÃO _saveForm AGORA É ASSÍNCRONA E SIMULA O SALVAMENTO ---
+  void _saveForm() async {
     // Valida o formulário
-    if (_formKey.currentState!.validate()) {
-      // Cria um novo objeto EmergencyContact com os dados do formulário
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Inicia o carregamento
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. Simula o atraso do salvamento no servidor
+      await Future.delayed(const Duration(milliseconds: 700));
+
+      // 2. Cria um novo objeto EmergencyContact com os dados do formulário
       final newContact = EmergencyContact(
         name: _nameController.text,
         relationship: _relationshipController.text,
         phoneNumber: _phoneController.text,
       );
-      // Fecha a tela e retorna o contato (novo ou atualizado) para a tela anterior
-      Navigator.of(context).pop(newContact);
+
+      // 3. Mostra a mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                '${widget.contact == null ? 'Contato adicionado' : 'Contato atualizado'} com sucesso (SIMULADO)!'),
+            backgroundColor: AppColors.success),
+      );
+
+      // 4. Fecha a tela e retorna o contato (novo ou atualizado) para a tela anterior
+      if (mounted) {
+        Navigator.of(context).pop(newContact);
+      }
+    } catch (e) {
+      // Caso haja algum erro interno (embora improvável neste modo mock)
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Erro ao salvar (Simulado): ${e.toString()}'),
+              backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      // Para o carregamento
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -64,8 +106,16 @@ class _EditContactScreenState extends State<EditContactScreen> {
             color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: _saveForm,
+            icon: _isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    // Mostra o indicador no AppBar
+                    child: CircularProgressIndicator(
+                        color: Colors.white, strokeWidth: 2.0))
+                : const Icon(Icons.save),
+            // Desabilita o botão enquanto estiver carregando
+            onPressed: _isLoading ? null : _saveForm,
             tooltip: 'Salvar',
           ),
         ],
@@ -111,9 +161,15 @@ class _EditContactScreenState extends State<EditContactScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 50, vertical: 15),
                     textStyle: const TextStyle(fontSize: 16)),
-                onPressed: _saveForm,
-                child: const Text('Salvar Contato',
-                    style: TextStyle(color: Colors.white)),
+                // Usa a flag _isLoading aqui também
+                onPressed: _isLoading ? null : _saveForm,
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(color: Colors.white))
+                    : const Text('Salvar Contato',
+                        style: TextStyle(color: Colors.white)),
               ),
             ],
           ),

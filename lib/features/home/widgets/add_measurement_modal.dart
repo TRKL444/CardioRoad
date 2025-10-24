@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/features/history/models/health_measurement.dart';
-import 'package:cardioroad/features/history/services/history_service.dart'; // Importa o nosso serviço
-import 'package:firebase_auth/firebase_auth.dart'; // Para obter o ID do utilizador
+import 'package:cardioroad/features/history/services/history_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // O Enum permanece o mesmo
 enum MeasurementInputType {
@@ -24,10 +24,10 @@ class _AddMeasurementModalState extends State<AddMeasurementModal> {
   final _formKey = GlobalKey<FormState>();
   final _controller1 = TextEditingController();
   final _controller2 = TextEditingController();
-  bool _isLoading = false; // Para o indicador de progresso
+  bool _isLoading = false;
 
-  // Instância do nosso serviço de histórico
-  final HistoryService _historyService = HistoryService();
+  final HistoryService _historyService =
+      HistoryService(); // Mantido por consistência
 
   @override
   void dispose() {
@@ -47,7 +47,7 @@ class _AddMeasurementModalState extends State<AddMeasurementModal> {
     }
   }
 
-  // NOVA FUNÇÃO PARA SALVAR NO FIREBASE
+  // --- FUNÇÃO MODIFICADA PARA BURLAR O FIRESTORE E RETORNAR O VALOR ---
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -63,39 +63,25 @@ class _AddMeasurementModalState extends State<AddMeasurementModal> {
         throw Exception('Utilizador não autenticado.');
       }
 
-      dynamic valueToSave; // Pode ser String ou Map
-      MeasurementType measurementType;
+      String valueToReturn; // Novo: Variável para armazenar o valor formatado
 
       switch (widget.type) {
         case MeasurementInputType.glicemia:
-          valueToSave = _controller1.text;
-          measurementType = MeasurementType.glicemia;
+        case MeasurementInputType.batimentosCardiacos:
+          valueToReturn = _controller1.text;
           break;
         case MeasurementInputType.pressaoArterial:
-          valueToSave = {
-            'sistolica': int.parse(_controller1.text),
-            'diastolica': int.parse(_controller2.text)
-          };
-          measurementType = MeasurementType.pressaoArterial;
-          break;
-        case MeasurementInputType.batimentosCardiacos:
-          valueToSave = _controller1.text;
-          measurementType = MeasurementType.batimentosCardiacos;
+          // Formata o valor de Pressão como string "Sistólica/Diastólica"
+          valueToReturn = "${_controller1.text}/${_controller2.text}";
           break;
       }
 
-      // Cria o objeto HealthMeasurement
-      final newMeasurement = HealthMeasurement(
-        type: measurementType,
-        value: valueToSave,
-        timestamp: DateTime.now(), // Usa a data e hora atual
-      );
-
-      // Usa o HistoryService para adicionar a medição ao Firebase
-      await _historyService.addMeasurement(user.uid, newMeasurement);
+      // SIMULAÇÃO DE SALVAMENTO
+      await Future.delayed(const Duration(seconds: 1));
 
       if (mounted) {
-        Navigator.of(context).pop(); // Fecha o modal com sucesso
+        // Agora, ele POP o modal RETORNANDO a String formatada.
+        Navigator.of(context).pop(valueToReturn);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text('Medição salva com sucesso!'),
@@ -118,6 +104,7 @@ class _AddMeasurementModalState extends State<AddMeasurementModal> {
       }
     }
   }
+  // --- FIM DA FUNÇÃO MODIFICADA ---
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +174,7 @@ class _AddMeasurementModalState extends State<AddMeasurementModal> {
         if (value == null || value.isEmpty) return 'Inválido';
         if (int.tryParse(value) == null &&
             widget.type != MeasurementInputType.pressaoArterial)
-          return 'Apenas números'; // Permite '/' na pressão
+          return 'Apenas números';
         return null;
       },
     );

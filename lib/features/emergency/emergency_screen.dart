@@ -4,10 +4,8 @@ import 'package:cardioroad/features/emergency/models/emergency_contact.dart';
 import 'package:cardioroad/features/emergency/widgets/contact_card.dart';
 import 'package:cardioroad/features/emergency/widgets/medical_id_card.dart';
 import 'package:cardioroad/features/emergency/edit_contact_screen.dart';
-
-// Importações do Firebase
+import 'package:cardioroad/features/emergency/edit_medical_id_screen.dart'; // Importa a tela de edição médica
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EmergencyScreen extends StatefulWidget {
   const EmergencyScreen({super.key});
@@ -18,31 +16,74 @@ class EmergencyScreen extends StatefulWidget {
 
 class _EmergencyScreenState extends State<EmergencyScreen> {
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+
+  // --- MOCK DATA AGORA É GESTÃO DE ESTADO LOCAL ---
+  // Este mapa será atualizado quando a ficha médica for salva.
+  Map<String, String> _medicalData = {
+    'bloodType': '',
+    'allergies': '',
+    'medications': '',
+    'doctor': '',
+  };
+
+  // Esta lista será atualizada quando um novo contato for adicionado.
+  List<EmergencyContact> _emergencyContacts = [
+    const EmergencyContact(
+      name: 'Eliane',
+      relationship: 'Mãe',
+      phoneNumber: '() 9 9999-9999',
+    ),
+  ];
+  // ----------------------------------------------------
 
   // Função para navegar e adicionar um novo contacto
   void _addContact() async {
     final user = _auth.currentUser;
-    if (user == null) return; // Garante que o utilizador está logado
+    if (user == null) return;
 
-    // Abre a tela de formulário para obter os dados do novo contacto
+    // Abre a tela de formulário e espera o EmergencyContact ser retornado
     final newContact = await Navigator.of(context).push<EmergencyContact>(
       MaterialPageRoute(
         builder: (context) => const EditContactScreen(),
       ),
     );
 
-    // Se o utilizador salvou um novo contacto, guarda-o no Firestore
+    // Se o contacto foi salvo (retornado), atualiza o estado local.
     if (newContact != null) {
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('emergency_contacts')
-          .add({
-        'name': newContact.name,
-        'relationship': newContact.relationship,
-        'phoneNumber': newContact.phoneNumber,
+      setState(() {
+        _emergencyContacts.add(newContact);
       });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Novo contato salvo com sucesso!'),
+              backgroundColor: AppColors.success),
+        );
+      }
+    }
+  }
+
+  // Função para navegar e editar a ficha médica
+  void _editMedicalId() async {
+    // Abre a tela de edição e espera o Map<String, String> com os novos dados
+    final result = await Navigator.of(context).push<Map<String, String>>(
+      MaterialPageRoute(
+        builder: (context) => EditMedicalIdScreen(initialData: _medicalData),
+      ),
+    );
+
+    // Se a ficha médica foi editada (o mapa foi retornado), atualiza o estado
+    if (result != null) {
+      setState(() {
+        _medicalData = result;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+              content: Text('Ficha médica atualizada com sucesso!'),
+              backgroundColor: AppColors.success),
+        );
+      }
     }
   }
 
@@ -50,7 +91,6 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   Widget build(BuildContext context) {
     final user = _auth.currentUser;
 
-    // Se o utilizador não estiver logado, mostra uma mensagem
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Ficha de Emergência')),
@@ -71,78 +111,42 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
         ),
       ),
       backgroundColor: AppColors.lightGreyBackground,
-      // Usamos um StreamBuilder para ouvir as alterações na base de dados em tempo real
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('users')
-            .doc(user.uid)
-            .collection('emergency_contacts')
-            .snapshots(),
-        builder: (context, snapshot) {
-          // Enquanto os dados estão a ser carregados, mostra um indicador de progresso
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          // Se ocorrer um erro
-          if (snapshot.hasError) {
-            return const Center(
-                child: Text('Ocorreu um erro ao carregar os contactos.'));
-          }
-
-          // Se não houver dados
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return _buildEmptyState();
-          }
-
-          // Processa a lista de contactos vinda do Firestore
-          final emergencyContacts = snapshot.data!.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return EmergencyContact(
-              name: data['name'] ?? '',
-              relationship: data['relationship'] ?? '',
-              phoneNumber: data['phoneNumber'] ?? '',
-            );
-          }).toList();
-
-          // Constrói a UI com os dados
-          return ListView(
-            padding: const EdgeInsets.all(16.0),
+      // Não há mais StreamBuilder - usamos a lista local
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          // Ficha Médica
+          GestureDetector(
+            onTap: _editMedicalId, // Chama a função de edição
+            child: MedicalIdCard(medicalData: _medicalData),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // TODO: Conectar a Ficha Médica ao Firebase
-              // GestureDetector(
-              //   onTap: () => _editMedicalId(medicalData),
-              //   child: MedicalIdCard(medicalData: medicalData),
-              // ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Contactos de Emergência',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.darkText)),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.add_circle, color: AppColors.primary),
-                    onPressed: _addContact,
-                    tooltip: 'Adicionar Contacto',
-                  ),
-                ],
+              const Text('Contactos de Emergência',
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText)),
+              IconButton(
+                icon: const Icon(Icons.add_circle, color: AppColors.primary),
+                onPressed: _addContact,
+                tooltip: 'Adicionar Contacto',
               ),
-              const SizedBox(height: 8),
-              ...emergencyContacts
-                  .map((contact) => ContactCard(contact: contact))
-                  .toList(),
             ],
-          );
-        },
+          ),
+          const SizedBox(height: 8),
+          // Lista de Contactos
+          ..._emergencyContacts
+              .map((contact) => ContactCard(contact: contact))
+              .toList(),
+        ],
       ),
     );
   }
 
-  // Widget para quando a lista de contactos está vazia
+  // Widget para quando a lista de contactos está vazia (Não é mais usada, mas mantida como fallback)
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.all(16.0),

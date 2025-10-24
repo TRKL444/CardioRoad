@@ -1,1 +1,54 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"cardioroad","appId":"1:879338207801:android:c58a835634c1eb8decabe8","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"cardioroad","configurations":{"android":"1:879338207801:android:c58a835634c1eb8decabe8","ios":"1:879338207801:ios:bcc374deeba26781ecabe8","macos":"1:879338207801:ios:bcc374deeba26781ecabe8","web":"1:879338207801:web:9f3804af76afd745ecabe8","windows":"1:879338207801:web:3cbebdcd1fcf81f3ecabe8"}}}}}}
+{
+  "project_info": {
+    "project_number": "879338207801",
+    "project_id": "cardioroad",
+    "storage_bucket": "cardioroad.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:879338207801:android:c58a835634c1eb8decabe8",
+        "android_client_info": {
+          "package_name": "com.example.cardioroad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "879338207801-2fbubeqlvuenvsc9nv4evhdl8c31mej1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.cardioroad",
+            "certificate_hash": "8ab3cbe955525e635283da5ed9568cf561e14bbd"
+          }
+        },
+        {
+          "client_id": "879338207801-lv2grvpjdjnulsbl1r83kvtvnv0mqca3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDVCiUXauiylSkJf_AiFodX2MZlMO313sg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "879338207801-lv2grvpjdjnulsbl1r83kvtvnv0mqca3.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "879338207801-s076ojll3pbu7erjnoeik74vvpcl9m1v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.cardioroad"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:cardioroad/features/history/history_screen.dart';
 import 'package:cardioroad/features/emergency/emergency_screen.dart';
-import 'package:cardioroad/features/settings/settings_screen.dart';
-import 'package:cardioroad/features/home/widgets/add_measurement_modal.dart';
+import 'package:cardioroad/features/settings/settings_screen.dart'; // Usando o novo nome da tela de ajustes
+import 'package:cardioroad/features/home/widgets/add_measurement_modal.dart'; // Corrigindo o import do modal
 import 'package:cardioroad/features/services/services_screen.dart';
 import 'package:cardioroad/features/partners/partners_screen.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -26,25 +26,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Função para abrir o modal e receber o novo valor
   void _showAddMeasurementModal(MeasurementInputType type) async {
+    // Definimos explicitamente que o resultado esperado é uma String
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      // Corrigindo o widget do modal, assumindo que foi renomeado e movido
       builder: (context) => AddMeasurementModal(type: type),
     );
 
+    // O result agora é garantido como String (ou null se o modal for fechado sem salvar)
     if (result != null && result.isNotEmpty) {
       setState(() {
         switch (type) {
           case MeasurementInputType.glicemia:
-            _glucoseValue = result;
+            _glucoseValue =
+                result; // Atualiza com a String retornada (ex: "120")
             break;
           case MeasurementInputType.pressaoArterial:
-            _bloodPressureValue = result;
+            _bloodPressureValue =
+                result; // Atualiza com a String retornada (ex: "120/80")
             break;
           case MeasurementInputType.batimentosCardiacos:
-            _heartRateValue = result;
+            _heartRateValue =
+                result; // Atualiza com a String retornada (ex: "75")
             break;
         }
       });

@@ -4,7 +4,7 @@ import 'package:cardioroad/shared/core/validators.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Mantido para referência, mas não usado
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,14 +15,15 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _loginCodeController = TextEditingController();
+  // Alterei o nome para refletir que agora ele deve ser o E-MAIL
+  final _emailOrCodeController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _loginCodeController.dispose();
+    _emailOrCodeController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -38,6 +39,12 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // 1. **MUDANÇA CRUCIAL:** Burlamos a busca do Firestore.
+      // O campo "Código de Acesso" agora deve ser preenchido com o E-MAIL completo.
+      final loginIdentifier = _emailOrCodeController.text.trim();
+
+      /*
+      // CÓDIGO ORIGINAL (CAUSAVA PERMISSION_DENIED):
       final querySnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('loginCode', isEqualTo: _loginCodeController.text.trim())
@@ -49,13 +56,16 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       final userDoc = querySnapshot.docs.first;
-      final userEmail = userDoc.data()['email'] as String;
+      final userEmail = userDoc.data()['email'] as String; // Pega o e-mail do Firestore
+      */
 
+      // 2. Usamos o identificador (que é o e-mail) diretamente no login
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: userEmail,
+        email: loginIdentifier, // Usamos o que o usuário digitou (E-mail)
         password: _passwordController.text.trim(),
       );
 
+      // Se o login for bem-sucedido:
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -63,15 +73,17 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } on FirebaseAuthException catch (e) {
       String message = 'Ocorreu um erro. Verifique as suas credenciais.';
+      // Mantemos a mensagem de erro específica do Auth
       if (e.code == 'user-not-found' ||
           e.code == 'wrong-password' ||
           e.code == 'invalid-credential') {
-        message = 'Código de acesso ou palavra-passe incorretos.';
+        message = 'E-mail ou palavra-passe incorretos.';
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message), backgroundColor: AppColors.error),
       );
     } catch (e) {
+      // Outros erros inesperados
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Ocorreu um erro inesperado.'),
@@ -150,15 +162,17 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 16),
+              // Alteramos o controlador e o rótulo para refletir o uso do e-mail
               TextFormField(
-                controller: _loginCodeController,
+                controller: _emailOrCodeController,
                 decoration: const InputDecoration(
-                  labelText: 'Código de Acesso',
-                  hintText: 'Os 4 últimos dígitos do seu telemóvel',
+                  labelText: 'E-mail',
+                  hintText: 'Seu endereço de e-mail completo',
                   border: OutlineInputBorder(),
                 ),
-                keyboardType: TextInputType.number,
-                validator: Validators.validateLoginCode,
+                keyboardType: TextInputType.emailAddress,
+                validator:
+                    Validators.validateEmail, // Usamos o validador de e-mail
               ),
               const SizedBox(height: 16),
               TextFormField(

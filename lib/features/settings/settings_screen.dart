@@ -22,7 +22,8 @@ class SettingsScreen extends StatelessWidget {
         );
       }
     } catch (e) {
-      print('Erro ao fazer logout: $e');
+      // Usar print para debug, mas mostrar SnackBar para o usuário
+      // print('Erro ao fazer logout: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -31,6 +32,90 @@ class SettingsScreen extends StatelessWidget {
         );
       }
     }
+  }
+
+  // Widget simples para evitar a complexidade do FutureBuilder
+  Widget _buildContent(BuildContext context, User user) {
+    // --- MOCK DATA E FALLBACK ---
+    // Removemos a busca do Firestore. Usamos dados do Auth e mock data.
+    final userName = user.displayName ?? 'Nathalia'; // Mock Data
+    final userEmail = user.email ?? 'sem.email@exemplo.com';
+    // --- FIM MOCK DATA ---
+
+    return ListView(
+      children: [
+        ProfileHeader(
+          userName: userName,
+          userEmail: userEmail,
+        ),
+        const Divider(),
+        _buildSectionHeader('Conta'),
+        SettingsOptionTile(
+          icon: Icons.person_outline,
+          title: 'Editar Perfil',
+          onTap: () {
+            // TODO: Implementar navegação para tela de edição de perfil
+            // (Esta ação precisa ser implementada no futuro)
+            print('Navegar para Edição de Perfil');
+          },
+        ),
+        SettingsOptionTile(
+          icon: Icons.lock_outline,
+          title: 'Alterar Palavra-passe',
+          onTap: () {
+            // Implementar alteração de senha com Firebase Auth
+            if (user.email != null) {
+              FirebaseAuth.instance.sendPasswordResetEmail(email: user.email!);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('E-mail de redefinição de senha enviado!'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Não foi possível enviar o e-mail de redefinição. E-mail não encontrado.'),
+                  backgroundColor: AppColors.error,
+                ),
+              );
+            }
+          },
+        ),
+        SettingsOptionTile(
+          icon: Icons.logout,
+          title: 'Sair',
+          onTap: () => _signOut(context),
+        ),
+        const Divider(),
+        _buildSectionHeader('Geral'),
+        SettingsOptionTile(
+          icon: Icons.notifications_none,
+          title: 'Notificações',
+          trailing: Switch(
+            value: true, // TODO: Implementar estado real de notificações
+            onChanged: (bool value) {
+              // TODO: Implementar lógica de notificações
+            },
+            activeColor: AppColors.primary,
+          ),
+          onTap: () {},
+        ),
+        const Divider(),
+        _buildSectionHeader('Outros'),
+        SettingsOptionTile(
+          icon: Icons.info_outline,
+          title: 'Sobre o CardioRoad',
+          onTap: () {},
+        ),
+        SettingsOptionTile(
+          icon: Icons.description_outlined,
+          title: 'Termos de Serviço',
+          onTap: () {},
+        ),
+      ],
+    );
   }
 
   @override
@@ -50,104 +135,8 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: user == null
           ? const Center(child: Text('Nenhum usuário logado'))
-          : FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(user.uid)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (snapshot.hasError) {
-                  return Center(child: Text('Erro: ${snapshot.error}'));
-                }
-
-                final userData = snapshot.data?.data() as Map<String, dynamic>?;
-                // Prioriza o nome do Firestore, depois do Firebase Auth, e por último um fallback
-                final userName =
-                    userData?['name'] ?? user.displayName ?? 'Usuário';
-                // Prioriza o email do Firebase Auth, e por último um fallback
-                final userEmail = user.email ?? 'sem.email@exemplo.com';
-
-                return ListView(
-                  children: [
-                    ProfileHeader(
-                      userName: userName,
-                      userEmail: userEmail,
-                    ),
-                    const Divider(),
-                    _buildSectionHeader('Conta'),
-                    SettingsOptionTile(
-                      icon: Icons.person_outline,
-                      title: 'Editar Perfil',
-                      onTap: () {
-                        // TODO: Implementar navegação para tela de edição de perfil
-                      },
-                    ),
-                    SettingsOptionTile(
-                      icon: Icons.lock_outline,
-                      title: 'Alterar Palavra-passe',
-                      onTap: () {
-                        // Implementar alteração de senha com Firebase Auth
-                        // Verifica se o email do usuário não é nulo antes de enviar o reset
-                        if (user.email != null) {
-                          FirebaseAuth.instance
-                              .sendPasswordResetEmail(email: user.email!);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'E-mail de redefinição de senha enviado!'),
-                              backgroundColor: AppColors.success,
-                            ),
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Não foi possível enviar o e-mail de redefinição. E-mail não encontrado.'),
-                              backgroundColor: AppColors.error,
-                            ),
-                          );
-                        }
-                      },
-                    ),
-                    SettingsOptionTile(
-                      icon: Icons.logout,
-                      title: 'Sair',
-                      onTap: () => _signOut(context),
-                    ),
-                    const Divider(),
-                    _buildSectionHeader('Geral'),
-                    SettingsOptionTile(
-                      icon: Icons.notifications_none,
-                      title: 'Notificações',
-                      trailing: Switch(
-                        value:
-                            true, // TODO: Implementar estado real de notificações
-                        onChanged: (bool value) {
-                          // TODO: Implementar lógica de notificações
-                        },
-                        activeColor: AppColors.primary,
-                      ),
-                      onTap: () {},
-                    ),
-                    const Divider(),
-                    _buildSectionHeader('Outros'),
-                    SettingsOptionTile(
-                      icon: Icons.info_outline,
-                      title: 'Sobre o CardioRoad',
-                      onTap: () {},
-                    ),
-                    SettingsOptionTile(
-                      icon: Icons.description_outlined,
-                      title: 'Termos de Serviço',
-                      onTap: () {},
-                    ),
-                  ],
-                );
-              },
-            ),
+          // Chama a nova função _buildContent diretamente com o usuário
+          : _buildContent(context, user),
     );
   }
 

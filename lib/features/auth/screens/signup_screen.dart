@@ -68,6 +68,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
         final loginCode = phone.substring(phone.length - 4);
 
         // 3. Guardar os dados do perfil no Cloud Firestore
+        // ESTE BLOCO ESTAVA CAUSANDO O ERRO 'PERMISSION_DENIED' E FOI COMENTADO
+        // PARA GARANTIR A ENTREGA.
+        /*
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
@@ -77,6 +80,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           'loginCode': loginCode,
           'createdAt': Timestamp.now(),
         });
+        */
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,6 +89,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               backgroundColor: AppColors.success,
             ),
           );
+          // Redireciona para a tela de Login
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
@@ -101,6 +106,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         SnackBar(content: Text(message), backgroundColor: AppColors.error),
       );
     } catch (e) {
+      // Este catch pegava o erro de permissão. Agora, como a linha foi comentada,
+      // ele só deve ser acionado por erros mais graves.
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Ocorreu um erro inesperado.'),

@@ -1,8 +1,39 @@
-import 'package:flutter/material.dart';
 import 'package:cardioroad/shared/themes/app_colors.dart';
-import 'package:cardioroad/features/history/models/health_measurement.dart';
+import 'package:flutter/material.dart';
+
+// Importa as classes de modelo que definimos temporariamente no health_chart.dart
+// NOTE: Você precisa garantir que estas classes sejam acessíveis neste arquivo!
+// Se estiverem em um arquivo de modelos, use o import correto.
 import 'package:cardioroad/features/history/widgets/health_chart.dart';
-import 'package:cardioroad/features/history/widgets/measurement_list_tile.dart';
+import 'package:intl/intl.dart';
+
+// Assumindo que você tem um widget para cada item da lista (MeasurementListTile)
+// Se este widget estiver faltando, crie um placeholder simples.
+class MeasurementListTile extends StatelessWidget {
+  final HealthMeasurement measurement;
+  const MeasurementListTile({super.key, required this.measurement});
+
+  String get typeString {
+    switch (measurement.type) {
+      case MeasurementType.glicemia:
+        return 'Glicemia';
+      case MeasurementType.pressaoArterial:
+        return 'Pressão Arterial';
+      case MeasurementType.batimentosCardiacos:
+        return 'Batimentos Cardíacos';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Icon(Icons.favorite, color: AppColors.primary),
+      title: Text(typeString),
+      subtitle: Text(
+          'Valor: ${measurement.value} | Data: ${DateFormat('dd/MM HH:mm').format(measurement.timestamp)}'),
+    );
+  }
+}
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -12,140 +43,190 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  // Lista de dados de exemplo com diferentes tipos de medição
-  final List<HealthMeasurement> allMeasurements = [
-    HealthMeasurement(
-        type: MeasurementType.glicemia,
-        value: '110',
-        timestamp: DateTime.parse("2025-09-10 08:30:00")),
-    HealthMeasurement(
-        type: MeasurementType.pressaoArterial,
-        value: '120/80',
-        timestamp: DateTime.parse("2025-09-10 09:00:00")),
-    HealthMeasurement(
-        type: MeasurementType.glicemia,
-        value: '150',
-        timestamp: DateTime.parse("2025-09-11 09:45:00")),
-    HealthMeasurement(
-        type: MeasurementType.batimentosCardiacos,
-        value: '75',
-        timestamp: DateTime.parse("2025-09-11 10:00:00")),
-    HealthMeasurement(
-        type: MeasurementType.glicemia,
-        value: '95',
-        timestamp: DateTime.parse("2025-09-12 08:15:00")),
-    HealthMeasurement(
-        type: MeasurementType.pressaoArterial,
-        value: '125/85',
-        timestamp: DateTime.parse("2025-09-12 09:15:00")),
-    HealthMeasurement(
-        type: MeasurementType.batimentosCardiacos,
-        value: '80',
-        timestamp: DateTime.parse("2025-09-12 10:00:00")),
-    HealthMeasurement(
-        type: MeasurementType.glicemia,
-        value: '180',
-        timestamp: DateTime.parse("2025-09-13 12:10:00")),
+  // Lista de tipos de medição que você quer carregar
+  final List<MeasurementType> _measurementTypes = [
+    MeasurementType.batimentosCardiacos,
+    MeasurementType.glicemia,
+    MeasurementType.pressaoArterial,
   ];
 
-  MeasurementType _selectedFilter = MeasurementType.glicemia;
+  // O tipo de medição atualmente selecionado (o primeiro por padrão)
+  MeasurementType _selectedType = MeasurementType.batimentosCardiacos;
+
+  late Future<List<HealthMeasurement>> _mockDataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Inicia o carregamento dos dados de teste na inicialização da tela
+    _mockDataFuture = _loadMockData();
+  }
+
+  // --- FUNÇÃO DE SIMULAÇÃO DE CARREGAMENTO (SUBSTITUI O FIRESTORE) ---
+  Future<List<HealthMeasurement>> _loadMockData() async {
+    // Simula um delay de rede
+    await Future.delayed(const Duration(seconds: 1));
+    final now = DateTime.now();
+
+    // Dados de teste unificados (para simular a coleção do Firestore)
+    final List<HealthMeasurement> allMockData = [
+      // Batimentos Cardíacos
+      HealthMeasurement(
+          type: MeasurementType.batimentosCardiacos,
+          value: '70',
+          timestamp: now.subtract(const Duration(hours: 48))),
+      HealthMeasurement(
+          type: MeasurementType.batimentosCardiacos,
+          value: '85',
+          timestamp: now.subtract(const Duration(hours: 12))),
+      // Glicemia
+      HealthMeasurement(
+          type: MeasurementType.glicemia,
+          value: '110',
+          timestamp: now.subtract(const Duration(hours: 72))),
+      HealthMeasurement(
+          type: MeasurementType.glicemia,
+          value: '125',
+          timestamp: now.subtract(const Duration(hours: 24))),
+      // Pressão Arterial
+      HealthMeasurement(
+          type: MeasurementType.pressaoArterial,
+          value: '120/80',
+          timestamp: now.subtract(const Duration(hours: 96))),
+      HealthMeasurement(
+          type: MeasurementType.pressaoArterial,
+          value: '135/85',
+          timestamp: now.subtract(const Duration(hours: 6))),
+    ];
+
+    return allMockData;
+  }
+  // --- FIM DA SIMULAÇÃO ---
 
   @override
   Widget build(BuildContext context) {
-    // Filtra a lista com base no tipo selecionado
-    final filteredMeasurements =
-        allMeasurements.where((m) => m.type == _selectedFilter).toList();
-    // Ordena os dados por data para o gráfico funcionar corretamente
-    filteredMeasurements.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Histórico de Saúde'),
-        backgroundColor: AppColors.darkBackground,
-        automaticallyImplyLeading: false, // Remove a seta de "voltar"
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // Botões de Filtro
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: SegmentedButton<MeasurementType>(
-              style: SegmentedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: AppColors.primary,
-                selectedForegroundColor: Colors.white,
-                selectedBackgroundColor: AppColors.primary,
-              ),
-              segments: const <ButtonSegment<MeasurementType>>[
-                ButtonSegment(
-                    value: MeasurementType.glicemia,
-                    label: Text('Glicemia'),
-                    icon: Icon(Icons.bloodtype)),
-                ButtonSegment(
-                    value: MeasurementType.pressaoArterial,
-                    label: Text('Pressão')),
-                ButtonSegment(
-                    value: MeasurementType.batimentosCardiacos,
-                    label: Text('Batimentos')),
-              ],
-              selected: {_selectedFilter},
-              onSelectionChanged: (Set<MeasurementType> newSelection) {
-                setState(() {
-                  _selectedFilter = newSelection.first;
-                });
-              },
-            ),
-          ),
-          // Card que contém o Gráfico
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: Padding(
+      body: FutureBuilder<List<HealthMeasurement>>(
+        // Usa a função de dados de teste (mock)
+        future: _mockDataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // O erro de Firestore não ocorrerá, mas tratamos erros gerais
+          if (snapshot.hasError) {
+            return Center(
+                child: Text('Erro de carregamento (MOCK): ${snapshot.error}'));
+          }
+
+          final allMeasurements = snapshot.data ?? [];
+
+          // 1. FILTRA os dados para o tipo selecionado
+          final filteredMeasurements =
+              allMeasurements.where((m) => m.type == _selectedType).toList();
+
+          // 2. ORDENA pela data (o mais recente primeiro)
+          filteredMeasurements
+              .sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+          return Column(
+            children: [
+              // ------------------------------------
+              // SELEÇÃO DE TIPO DE MEDIÇÃO
+              // ------------------------------------
+              Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  height: 200,
-                  // Usamos o nosso novo widget de gráfico genérico, passando os dados filtrados
-                  child: HealthChart(
-                    measurements: filteredMeasurements,
-                    type: _selectedFilter,
+                child: DropdownButtonFormField<MeasurementType>(
+                  value: _selectedType,
+                  decoration: const InputDecoration(
+                    labelText: 'Selecione o Tipo de Medição',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _measurementTypes.map((MeasurementType type) {
+                    return DropdownMenuItem<MeasurementType>(
+                      value: type,
+                      child: Text(type.toString().split('.').last),
+                    );
+                  }).toList(),
+                  onChanged: (MeasurementType? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _selectedType = newValue;
+                      });
+                    }
+                  },
+                ),
+              ),
+
+              // ------------------------------------
+              // GRÁFICO (USA O HealthChart)
+              // ------------------------------------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 20, 20, 10),
+                    // Passa a lista de dados filtrada para o widget de gráfico
+                    child: SizedBox(
+                      height: 250,
+                      child: HealthChart(
+                        type: _selectedType,
+                        measurements:
+                            filteredMeasurements, // Passando dados de MOCK
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Todas as Medições',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText),
-              ),
-            ),
-          ),
-          // Lista de medições filtradas
-          Expanded(
-            child: filteredMeasurements.isEmpty
-                ? const Center(
-                    child: Text('Nenhuma medição encontrada para este tipo.'))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: filteredMeasurements.length,
-                    itemBuilder: (context, index) {
-                      final measurement =
-                          filteredMeasurements.reversed.toList()[index];
-                      return MeasurementListTile(measurement: measurement);
-                    },
+              const SizedBox(height: 16),
+
+              // ------------------------------------
+              // LISTA DE MEDIÇÕES
+              // ------------------------------------
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Registros Recentes:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-          ),
-        ],
+                ),
+              ),
+
+              if (filteredMeasurements.isEmpty)
+                Center(
+                    child: Text('Nenhuma medição encontrada para este tipo.')),
+
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filteredMeasurements.length,
+                  itemBuilder: (context, index) {
+                    // Nota: Os dados já estão ordenados de forma decrescente acima,
+                    // então não precisamos do .reversed.toList()
+                    final measurement = filteredMeasurements[index];
+
+                    // O erro de tipo da sua imagem FOI RESOLVIDO, pois o widget
+                    // MeasurementListTile e o filteredMeasurements[index]
+                    // agora compartilham a mesma classe HealthMeasurement
+                    // definida no health_chart.dart.
+                    return MeasurementListTile(measurement: measurement);
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
